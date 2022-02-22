@@ -1,0 +1,44 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: svr-cb-auth-svc
+    container_name: svr-cb-auth-svc
+    restart: always
+    volumes:
+      - ./src:/opt/app/src
+    env_file:
+      - .env
+    ports:
+      - '3000:3000'
+    command: npm run start:debug
+    depends_on:
+      - mongodb-auth
+      - rabbitmq
+      - redis
+
+  mongodb-auth:
+    image: mongo:4.2.5
+    container_name: mongodb-auth
+    restart: always
+    ports:
+      - '27018:27017'
+
+  redis:
+    image: 'redis:5-alpine'
+    ports:
+      - '6379:6379'
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - '8031:15672'
+      - '5672:5672'
+      - '5671:5671'
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_PASS=mypass
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_VHOST=myvhost
